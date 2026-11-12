@@ -1,0 +1,109 @@
+:root,
+.dark {
+  /* Stadium & Pitch Dark Base Palette */
+  --color-stadium-base: #070B0E;
+  --color-stadium-surface: #0E151B;
+  --color-stadium-elevated: #15202B;
+  --color-stadium-overlay: rgba(7, 11, 14, 0.85);
+  --color-stadium-border: rgba(255, 255, 255, 0.08);
+  --color-stadium-border-strong: rgba(163, 230, 53, 0.35);
+  --color-stadium-border-subtle: rgba(255, 255, 255, 0.05);
+
+  /* Tactical Electric Accents */
+  --color-volt: #A3E635;
+  --color-volt-hover: #BEF264;
+  --color-volt-active: #84CC16;
+  --color-volt-dim: rgba(163, 230, 53, 0.12);
+  --color-volt-glow: rgba(163, 230, 53, 0.35);
+
+  --color-telemetry-cyan: #22D3EE;
+  --color-telemetry-cyan-hover: #67E8F9;
+  --color-telemetry-cyan-dim: rgba(34, 211, 238, 0.12);
+  --color-telemetry-cyan-glow: rgba(34, 211, 238, 0.35);
+
+  /* Thermal Heatmap & Alert Gradient */
+  --color-thermal-low: #0EA5E9;
+  --color-thermal-mid-1: #10B981;
+  --color-thermal-mid-2: #FACC15;
+  --color-thermal-mid-3: #F97316;
+  --color-thermal-high: #EF4444;
+
+  /* Pitch Rendering Tokens (Night Grass & Telemetry Lines) */
+  --color-pitch-dark: #081C15;
+  --color-pitch-light: #0B241B;
+  --color-pitch-line: rgba(255, 255, 255, 0.45);
+  --color-pitch-line-faint: rgba(255, 255, 255, 0.20);
+
+  /* Text Colors */
+  --color-text-main: #F8FAFC;
+  --color-text-muted: #94A3B8;
+  --color-text-faint: #64748B;
+
+  /* Shadows */
+  --shadow-stadium-card: 0 4px 20px -2px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--color-stadium-border);
+  --shadow-volt-glow: 0 0 16px -2px rgba(163, 230, 53, 0.4);
+  --shadow-cyan-glow: 0 0 16px -2px rgba(34, 211, 238, 0.4);
+  --shadow-thermal-glow: 0 0 16px -2px rgba(239, 68, 68, 0.4);
+}
+
+.light {
+  /* Clean Daylight Stadium Palette */
+  --color-stadium-base: #F8FAFC;
+  --color-stadium-surface: #FFFFFF;
+  --color-stadium-elevated: #F1F5F9;
+  --color-stadium-overlay: rgba(248, 250, 252, 0.88);
+  --color-stadium-border: rgba(15, 23, 42, 0.08);
+  --color-stadium-border-strong: rgba(101, 163, 13, 0.4);
+  --color-stadium-border-subtle: rgba(15, 23, 42, 0.04);
+
+  /* High-Contrast Daylight Accents */
+  --color-volt: #4D7C0F;
+  --color-volt-hover: #3F6212;
+  --color-volt-active: #365314;
+  --color-volt-dim: rgba(101, 163, 13, 0.12);
+  --color-volt-glow: rgba(101, 163, 13, 0.25);
+
+  --color-telemetry-cyan: #0284C7;
+  --color-telemetry-cyan-hover: #0369A1;
+  --color-telemetry-cyan-dim: rgba(2, 132, 199, 0.12);
+  --color-telemetry-cyan-glow: rgba(2, 132, 199, 0.25);
+
+  /* Thermal stays authentic sports science */
+  --color-thermal-low: #0284C7;
+  --color-thermal-mid-1: #059669;
+  --color-thermal-mid-2: #D97706;
+  --color-thermal-mid-3: #EA580C;
+  --color-thermal-high: #DC2626;
+
+  /* Pitch Rendering Tokens (Natural Grass Day broadcast) */
+  --color-pitch-dark: #0A2218;
+  --color-pitch-light: #0D2C1F;
+  --color-pitch-line: rgba(255, 255, 255, 0.55);
+  --color-pitch-line-faint: rgba(255, 255, 255, 0.25);
+
+  /* Text Colors */
+  --color-text-main: #0F172A;
+  --color-text-muted: #475569;
+  --color-text-faint: #94A3B8;
+
+  /* Shadows */
+  --shadow-stadium-card: 0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 0 0 1px var(--color-stadium-border);
+  --shadow-volt-glow: 0 0 12px -2px rgba(101, 163, 13, 0.2);
+  --shadow-cyan-glow: 0 0 12px -2px rgba(2, 132, 199, 0.2);
+  --shadow-thermal-glow: 0 0 12px -2px rgba(220, 38, 38, 0.2);
+}
+
+:root {
+  /* Modern High-Performance Typography: Space Grotesk + Inter + Space Mono */
+  --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Space Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Border Radii */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+}

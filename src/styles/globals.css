@@ -1,0 +1,291 @@
+@import "./tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: var(--color-stadium-border);
+  }
+
+  html,
+  body {
+    background-color: var(--color-stadium-base);
+    color: var(--color-text-main);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    min-height: 100vh;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  /* Custom tactical scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-stadium-base);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1E293B;
+    border-radius: var(--radius-full);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-volt);
+  }
+
+  /* Accessible high-contrast focus rings in Volt */
+  :focus-visible {
+    outline: 2px solid var(--color-volt);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .tactical-glass {
+    background-color: var(--color-stadium-surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--color-stadium-border);
+  }
+
+  .tactical-glass-elevated {
+    background-color: var(--color-stadium-elevated);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-stadium-border-strong);
+  }
+
+  .tactical-border-gradient {
+    border-image: linear-gradient(to bottom, var(--color-volt), transparent) 1;
+  }
+
+  .text-glow-volt {
+    text-shadow: 0 0 12px rgba(163, 230, 53, 0.5);
+  }
+
+  .text-glow-cyan {
+    text-shadow: 0 0 12px rgba(34, 211, 238, 0.5);
+  }
+
+  .stadium-mesh-bg {
+    background-color: var(--color-stadium-base);
+    background-image: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(163, 230, 53, 0.08), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(34, 211, 238, 0.05), transparent 70%),
+      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+  }
+}
+
+/* ==========================================================================
+   HIGH-CONTRAST LIGHT MODE ENGINE
+   Guarantees WCAG AAA legibility, crisp input fields, and distinct card layers
+   ========================================================================== */
+.light {
+  color-scheme: light;
+}
+
+/* 1. Universal Typography Adaptations */
+.light .text-white {
+  color: #0F172A !important;
+}
+
+.light .text-slate-100,
+.light .text-slate-200,
+.light .text-slate-300 {
+  color: #1E293B !important;
+}
+
+.light .text-slate-400 {
+  color: #475569 !important;
+}
+
+.light .text-slate-500 {
+  color: #64748B !important;
+}
+
+/* 2. Form Controls: Inputs, Selects, and Textareas */
+.light input,
+.light select,
+.light textarea {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+.light select option {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+}
+
+.light input:focus,
+.light select:focus,
+.light textarea:focus {
+  border-color: #4D7C0F !important;
+  box-shadow: 0 0 0 2px rgba(77, 124, 15, 0.25) !important;
+}
+
+/* 3. Containers, Cards, and Transparent Subsurfaces */
+.light .bg-stadium-surface {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+
+.light .bg-stadium-elevated {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+.light .bg-stadium-base {
+  background-color: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+}
+
+.light .bg-white\/5,
+.light .bg-white\/\[0\.02\],
+.light .bg-white\/\[0\.03\],
+.light .bg-white\/10 {
+  background-color: #F1F5F9 !important;
+}
+
+.light .border-white\/5,
+.light .border-white\/10,
+.light .border-white\/15,
+.light .border-white\/20 {
+  border-color: #E2E8F0 !important;
+}
+
+.light .border-stadium-border {
+  border-color: #E2E8F0 !important;
+}
+
+/* 4. Interactive Buttons */
+.light .bg-volt {
+  background-color: #4D7C0F !important;
+  color: #FFFFFF !important;
+}
+
+.light .bg-volt * {
+  color: inherit !important;
+}
+
+.light .bg-volt:hover {
+  background-color: #3F6212 !important;
+}
+
+.light .bg-telemetry-cyan {
+  background-color: #0284C7 !important;
+  color: #FFFFFF !important;
+}
+
+.light .bg-telemetry-cyan * {
+  color: inherit !important;
+}
+
+.light .bg-telemetry-cyan:hover {
+  background-color: #0369A1 !important;
+}
+
+.light .bg-thermal-high {
+  background-color: #DC2626 !important;
+  color: #FFFFFF !important;
+}
+
+.light .bg-thermal-high * {
+  color: inherit !important;
+}
+
+.light button.bg-stadium-elevated,
+.light button.bg-white\/5 {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #1E293B !important;
+}
+
+.light button.bg-stadium-elevated:hover,
+.light button.bg-white\/5:hover {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+/* 5. Accents, Badges, and Semantic Colors */
+.light .text-volt {
+  color: #3F6212 !important;
+}
+
+.light .border-volt,
+.light .border-volt\/30,
+.light .border-volt\/40,
+.light .border-volt\/50 {
+  border-color: rgba(77, 124, 15, 0.45) !important;
+}
+
+.light .bg-volt\/10,
+.light .bg-volt\/15,
+.light .bg-volt\/20 {
+  background-color: rgba(77, 124, 15, 0.12) !important;
+}
+
+.light .text-telemetry-cyan {
+  color: #0369A1 !important;
+}
+
+.light .border-telemetry-cyan,
+.light .border-telemetry-cyan\/20,
+.light .border-telemetry-cyan\/30,
+.light .border-telemetry-cyan\/40 {
+  border-color: rgba(2, 132, 199, 0.45) !important;
+}
+
+.light .bg-telemetry-cyan\/10,
+.light .bg-telemetry-cyan\/15,
+.light .bg-telemetry-cyan\/20 {
+  background-color: rgba(2, 132, 199, 0.12) !important;
+}
+
+.light .text-thermal-high {
+  color: #DC2626 !important;
+}
+
+.light .border-thermal-high,
+.light .border-thermal-high\/20,
+.light .border-thermal-high\/30 {
+  border-color: rgba(220, 38, 38, 0.45) !important;
+}
+
+.light .bg-thermal-high\/10,
+.light .bg-thermal-high\/15,
+.light .bg-thermal-high\/20 {
+  background-color: rgba(220, 38, 38, 0.1) !important;
+}
+
+/* 6. Recharts Radar & Telemetry Charts in Light Mode */
+.light .recharts-polar-grid-concentric-circle,
+.light .recharts-polar-grid-angle line {
+  stroke: rgba(15, 23, 42, 0.15) !important;
+}
+
+.light .recharts-polar-angle-axis-tick text {
+  fill: #1E293B !important;
+}
+
+/* 7. Preserved Elements (Stay White / Dark Contrast) */
+.light [data-preserve-white="true"],
+.light .preserve-white,
+.light .bg-volt .preserve-white,
+.light .bg-telemetry-cyan .preserve-white,
+.light .bg-thermal-high .preserve-white,
+.light .bg-black,
+.light .bg-black .text-white {
+  color: #FFFFFF !important;
+}
