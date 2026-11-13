@@ -266,16 +266,16 @@ export function LocalVisionSetupForm() {
           </div>
           <div>
             <h2 className="text-xl md:text-2xl font-display font-black uppercase tracking-tight text-white flex items-center gap-2">
-              Motor Visión Artificial Real <span className="text-volt">YOLOv8</span>
+              Análisis de Video <span className="text-volt">con IA</span>
             </h2>
             <p className="text-xs text-slate-400 font-sans">
-              Procesamiento de video local .mp4 cuadro a cuadro con tracking de ByteTrack y homografía FIFA
+              Sube tu video del partido y obtén estadísticas, mapa de calor y jugadas clave al instante
             </p>
           </div>
         </div>
 
         <Badge variant="volt" size="md" pulse className="self-start sm:self-auto">
-          FASTAPI + OPENCV + YOLOV8
+          ANÁLISIS INTELIGENTE
         </Badge>
       </div>
 
@@ -551,7 +551,7 @@ export function LocalVisionSetupForm() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-display uppercase tracking-wider font-bold text-slate-200 flex items-center justify-between">
                   <span>Descripción de Vestimenta</span>
-                  <span className="text-[10px] text-volt font-mono font-normal">Clave para YOLOv8</span>
+                  <span className="text-[10px] text-volt font-mono font-normal">Ayuda a identificarlo en el video</span>
                 </label>
                 <input
                   type="text"

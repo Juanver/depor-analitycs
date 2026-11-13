@@ -132,7 +132,7 @@ export default function AnalysisDashboardPage() {
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 rounded-lg bg-stadium-surface/80 border border-stadium-border">
       <div className="flex items-center gap-2.5 min-w-0">
         <span className="inline-flex items-center px-2 py-0.5 rounded-xs bg-telemetry-cyan/15 border border-telemetry-cyan/30 text-[10px] font-mono font-bold uppercase tracking-wider text-telemetry-cyan shrink-0">
-          Dossier PDF
+          Informe PDF
         </span>
         <span className="text-xs text-slate-300 font-sans truncate">
           {hasServicePdf
@@ -398,9 +398,9 @@ export default function AnalysisDashboardPage() {
               <Card variant="default" className="p-4 flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <SectionHeader
-                    tag="CANCHA 2D CENITAL COLECTIVA"
-                    title="Distribución Térmica del Bloque"
-                    subtitle={`Cancha calibrada a dimensiones de ${gameFormat} con matriz FIFA 100x68`}
+                    tag="MAPA DE CANCHA"
+                    title="Zonas de Mayor Presencia del Equipo"
+                    subtitle={`Distribución del equipo en cancha de ${gameFormat}`}
                     icon={<LayoutGrid className="w-5 h-5 text-volt" />}
                     variant="volt"
                   />
@@ -441,7 +441,7 @@ export default function AnalysisDashboardPage() {
                         : 'bg-stadium-base/90 border-stadium-border text-slate-300 hover:text-white'
                     }`}
                   >
-                    {showRawPoints ? 'Ocultar Puntos Crudos' : 'Ver Puntos Crudos'}
+                    {showRawPoints ? 'Ocultar Puntos Exactos' : 'Ver Puntos Exactos'}
                   </button>
                 </div>
 
@@ -643,7 +643,7 @@ export default function AnalysisDashboardPage() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-300 font-sans mt-0.5">
-                  Extracción de telemetría biométrica y mapeo homográfico cenital para {player.name} #{player.dorsal}.
+                  Resumen físico y posicionamiento en cancha de {player.name} #{player.dorsal}.
                 </p>
               </div>
             </div>
@@ -677,9 +677,9 @@ export default function AnalysisDashboardPage() {
             <Card variant="default" className="p-4 flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <SectionHeader
-                  tag="CANCHA 2D CENITAL"
-                  title="Telemetría Espacial"
-                  subtitle="Mapeo de calor e intervenciones en tiempo real"
+                  tag="MAPA DE CANCHA"
+                  title="Mapa de Calor y Jugadas"
+                  subtitle="Recorrido del jugador y momentos clave del partido"
                   icon={<LayoutGrid className="w-5 h-5 text-volt" />}
                   variant="volt"
                 />
@@ -726,7 +726,7 @@ export default function AnalysisDashboardPage() {
                       : 'bg-stadium-base/90 border-stadium-border text-slate-300 hover:text-white'
                   }`}
                 >
-                  {showRawPoints ? 'Ocultar Puntos Crudos' : 'Ver Puntos Crudos'}
+                  {showRawPoints ? 'Ocultar Puntos Exactos' : 'Ver Puntos Exactos'}
                 </button>
 
                 {/* Proportional HTML Tooltip Overlay */}
@@ -786,9 +786,9 @@ export default function AnalysisDashboardPage() {
         {/* QUANTITATIVE METRICS: RADAR & KPI GRID */}
         <section id="section-metrics" className="flex flex-col gap-4 scroll-mt-20">
           <SectionHeader
-            tag="RENDIMIENTO CUANTITATIVO"
-            title="Telemetría & Indicadores Clave (KPIs)"
-            subtitle="Métricas segmentadas del jugador para el tramo actual"
+            tag="NÚMEROS DEL PARTIDO"
+            title="Estadísticas Clave"
+            subtitle="Rendimiento del jugador en el tramo seleccionado"
             icon={<Activity className="w-5 h-5 text-volt" />}
             variant="volt"
           />
@@ -803,9 +803,9 @@ export default function AnalysisDashboardPage() {
         {/* COACH DIAGNOSTIC & IMPROVEMENT PLAN */}
         <section id="section-coach" className="flex flex-col gap-4 pt-4 scroll-mt-20">
           <SectionHeader
-            tag="NIKE FOOTBALL LABS & BROADCAST COACH"
-            title="Diagnóstico del Entrenador & Plan de Mejora"
-            subtitle="Análisis biomecánico, causas raíz de pérdidas y ejercicios prescritos"
+            tag="EVALUACIÓN TÉCNICA"
+            title="Análisis del Entrenador y Plan de Mejora"
+            subtitle="Puntos fuertes, aspectos a mejorar y ejercicios recomendados"
             icon={<Dumbbell className="w-5 h-5 text-volt" />}
             variant="volt"
           />

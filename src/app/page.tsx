@@ -132,15 +132,15 @@ export default function HomePage() {
         {/* HERO HEADER */}
         <section className="text-center max-w-3xl mx-auto mb-10 flex flex-col items-center">
           <Badge variant="volt" size="md" pulse className="mb-4">
-            SPORTS DATA VISUALIZATION & AI TRACKING
+            ANÁLISIS DE FÚTBOL CON INTELIGENCIA ARTIFICIAL
           </Badge>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-extrabold uppercase tracking-tight text-white leading-tight">
-            Análisis Táctico <span className="text-volt text-glow-volt">Pro Broadcast</span> por Video
+            Análisis Táctico <span className="text-volt text-glow-volt">Profesional</span> por Video
           </h1>
 
           <p className="mt-4 text-base sm:text-lg text-slate-300 font-sans leading-relaxed max-w-2xl">
-            Telemetría de élite para <strong>jugadores individuales</strong> y <strong>equipos completos</strong> con seguimiento de indumentaria, redes de pase y mapas térmicos en <strong>Fútbol 5, 7, 9 y 11</strong>. Potenciado por <strong>Visión Artificial YOLOv8 + ByteTrack</strong> y <strong>Gemini 2.5</strong>.
+            Descubre qué pasó en tu partido con estadísticas claras para <strong>jugadores individuales</strong> y <strong>equipos completos</strong> en <strong>Fútbol 5, 7, 9 y 11</strong>. Sube tu video y obtén mapas de calor, jugadas clave y recomendaciones prácticas.
           </p>
 
           {/* CRITICAL DEMO ACCESS BUTTONS */}
@@ -542,10 +542,10 @@ export default function HomePage() {
               <Crosshair className="w-5 h-5" />
             </div>
             <h3 className="font-display font-extrabold text-base uppercase tracking-tight text-white">
-              YOLOv8 + ByteTrack
+              Seguimiento Automático
             </h3>
             <p className="text-xs text-slate-400 font-sans leading-relaxed">
-              Visión artificial real por video .mp4 con seguimiento de IDs, segmentación de indumentaria y homografía FIFA.
+              Identifica al jugador o al equipo en tu video según su camiseta, dorsal y posición en la cancha.
             </p>
           </Card>
 
@@ -554,10 +554,10 @@ export default function HomePage() {
               <Flame className="w-5 h-5" />
             </div>
             <h3 className="font-display font-extrabold text-base uppercase tracking-tight text-white">
-              Mapa de Calor 2D Cenital
+              Mapa de Calor en Cancha
             </h3>
             <p className="text-xs text-slate-400 font-sans leading-relaxed">
-              Cancha proporcional con dinámica adaptada a Fútbol 5, 7, 9 o 11 y densidad térmica gaussiana continua.
+              Visualiza de forma clara las zonas donde más participó el jugador o el equipo, adaptado a Fútbol 5, 7, 9 u 11.
             </p>
           </Card>
 
@@ -566,10 +566,10 @@ export default function HomePage() {
               <Video className="w-5 h-5" />
             </div>
             <h3 className="font-display font-extrabold text-base uppercase tracking-tight text-white">
-              Sincronización a [MM:SS]
+              Saltos Directos al Video
             </h3>
             <p className="text-xs text-slate-400 font-sans leading-relaxed">
-              Toca cualquier segundo en jugadas o debilidades y el reproductor de video local o YouTube saltará al instante.
+              Toca cualquier jugada destacada o corrección y el reproductor saltará al instante al segundo exacto.
             </p>
           </Card>
 
@@ -578,10 +578,10 @@ export default function HomePage() {
               <Compass className="w-5 h-5" />
             </div>
             <h3 className="font-display font-extrabold text-base uppercase tracking-tight text-white">
-              Diagnóstico Individual & Colectivo
+              Informe y Plan de Mejora
             </h3>
             <p className="text-xs text-slate-400 font-sans leading-relaxed">
-              Métricas de bloque táctico, centroides espaciales, radar de 5 ejes y prescripción de ejercicios para entrenamiento.
+              Resumen de fortalezas, aspectos a corregir, gráficos comparativos y ejercicios listos para entrenar.
             </p>
           </Card>
         </section>
@@ -590,7 +590,7 @@ export default function HomePage() {
       {/* FOOTER */}
       <footer className="w-full bg-stadium-surface border-t border-stadium-border py-6 px-4 text-center text-xs text-slate-500 font-mono">
         <p>
-          SPORT INTELLIGENCE © 2026 • Broadcast Sports Telemetry & Vision AI • Powered by YOLOv8, ByteTrack & Gemini
+          DEPORANALYTICS © 2026 • Análisis Táctico y Rendimiento Deportivo con IA
         </p>
       </footer>
 
