@@ -2,26 +2,22 @@
 
 import React from 'react';
 import { PlayerScoutProfile, TimeSegment, TacticalEvent } from '@/types/analysis';
+import { VisionSeguimientoTactico } from '@/types/visionAnalysis';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import {
   Sparkles,
   Play,
-  CheckCircle2,
-  AlertTriangle,
-  Activity,
-  Layers,
   Footprints,
-  Shield,
-  Share2,
-  Swords,
-  Crosshair,
 } from 'lucide-react';
 
 export interface PlayerSegmentTrackingCardProps {
   player: PlayerScoutProfile;
   segment: TimeSegment;
   onSelectEvent: (event: TacticalEvent) => void;
+  seguimientoTactico?: VisionSeguimientoTactico;
+  kitDescription?: string;
+  resumenTacticoCorto?: string;
   className?: string;
 }
 
@@ -29,20 +25,39 @@ export function PlayerSegmentTrackingCard({
   player,
   segment,
   onSelectEvent,
+  seguimientoTactico,
+  kitDescription,
+  resumenTacticoCorto,
   className,
 }: PlayerSegmentTrackingCardProps) {
-  // Qualitative tactical summary tailored by segment for the tracked player
-  const getSegmentNarrative = (segmentId: string) => {
-    switch (segmentId) {
-      case '0-10':
-        return `Inicio dominante de ${player.name} en el fondo: bloqueó el remate a quemarropa de Jorge al [03:40], ejecutó el córner derecho cerrado al [02:02] y neutralizó la contra rival con barrida de líbero al [08:14].`;
-      case '10-20':
-        return `Fase de contención y temple. Tras el 1-0 encajado en transición al [11:51], ${player.name} reorganizó la última línea, aguantó la presión física del Tanque Jorge y aseguró la posesión aérea al [19:41].`;
-      case '20-end':
-        return `Cierre de partido de jerarquía. Condujo la salida limpia al [23:05] filtrando el pase que habilitó a El Parce para liquidar el triunfo 4-2 de Dibujitos FC.`;
-      default:
-        return `Despliegue integral de ${player.name}: pilar en la última línea con 10 intercepciones, 85% de duelos ganados, bloqueo heroico al [03:40] y ejecutor de pelota parada.`;
+  const effectiveKit =
+    kitDescription ||
+    player.kitDescription ||
+    (player.shirtColor && !player.shirtColor.startsWith('#')
+      ? player.shirtColor
+      : '');
+
+  const accionesCount =
+    seguimientoTactico?.accionesClaveCount ?? segment.events.length;
+  const pasesPct =
+    seguimientoTactico?.pasesExitoPct ?? segment.kpis.passAccuracy;
+  const duelosPct =
+    seguimientoTactico?.duelos1v1Pct ?? segment.kpis.duelsWonRate;
+  const cortesTotal =
+    seguimientoTactico?.cortesAnticipaciones ??
+    segment.kpis.interceptions + segment.kpis.recoveries;
+
+  const getSegmentNarrative = () => {
+    if (seguimientoTactico?.resumenCorto) {
+      return seguimientoTactico.resumenCorto;
     }
+    if (resumenTacticoCorto) {
+      return resumenTacticoCorto;
+    }
+    if (player.playStyle) {
+      return `${player.name}: ${player.playStyle} (${pasesPct}% precisión de pase, ${duelosPct}% duelos ganados y ${cortesTotal} recuperaciones en ${segment.label}).`;
+    }
+    return `Despliegue táctico de ${player.name} en ${segment.label}: ${pasesPct}% de precisión en pases, ${duelosPct}% de duelos 1v1 ganados y ${cortesTotal} acciones de anticipación.`;
   };
 
   return (
@@ -75,12 +90,20 @@ export function PlayerSegmentTrackingCard({
         </div>
 
         {/* Visual Kit Tracking Pill */}
-        <div className="flex items-center gap-1.5 px-2 py-1 rounded-xs bg-stadium-base border border-stadium-border text-[9px] font-display uppercase tracking-wider text-slate-300 shrink-0">
-          <Footprints className="w-3 h-3 text-orange-400 shrink-0" />
-          <span className="text-slate-400">Kit:</span>
-          <span className="text-white font-bold">Zapatillas Naranja</span>
-          <span className="text-slate-500">•</span>
-          <span className="text-slate-300">Camiseta Negra</span>
+        <div className="flex items-center gap-1.5 px-2 py-1 rounded-xs bg-stadium-base border border-stadium-border text-[9px] font-display uppercase tracking-wider text-slate-300 shrink-0 max-w-full sm:max-w-[230px]">
+          <Footprints className="w-3 h-3 text-volt shrink-0" />
+          <span className="text-slate-400 shrink-0">Kit:</span>
+          <span className="text-white font-bold truncate">
+            {effectiveKit || `${player.team} #${player.dorsal}`}
+          </span>
+          {player.detectedColor && (
+            <>
+              <span className="text-slate-500">•</span>
+              <span className="text-telemetry-cyan font-mono shrink-0">
+                {player.detectedColor}
+              </span>
+            </>
+          )}
         </div>
       </div>
 
@@ -91,7 +114,7 @@ export function PlayerSegmentTrackingCard({
             Acciones Clave
           </span>
           <span className="font-display font-black text-base text-white">
-            {segment.events.length}
+            {accionesCount}
           </span>
         </div>
 
@@ -100,7 +123,7 @@ export function PlayerSegmentTrackingCard({
             Pases Éxito
           </span>
           <span className="font-display font-black text-base text-telemetry-cyan">
-            {segment.kpis.passAccuracy}%
+            {pasesPct}%
           </span>
         </div>
 
@@ -109,7 +132,7 @@ export function PlayerSegmentTrackingCard({
             Duelos 1v1
           </span>
           <span className="font-display font-black text-base text-volt">
-            {segment.kpis.duelsWonRate}%
+            {duelosPct}%
           </span>
         </div>
 
@@ -118,14 +141,14 @@ export function PlayerSegmentTrackingCard({
             Cortes / Anticip.
           </span>
           <span className="font-display font-black text-base text-emerald-400">
-            {segment.kpis.interceptions + segment.kpis.recoveries}
+            {cortesTotal}
           </span>
         </div>
       </div>
 
       {/* Segment Tactical Evaluation of the Player */}
       <div className="p-2.5 rounded-xs bg-white/[0.03] border-l-2 border-l-volt text-[11px] text-slate-200 font-sans leading-relaxed">
-        {getSegmentNarrative(segment.id)}
+        {getSegmentNarrative()}
       </div>
 
       {/* Actionable Verified Events of the Player in this Segment */}

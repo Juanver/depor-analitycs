@@ -90,12 +90,26 @@ export function PlayerScoutCard({ player, className }: PlayerScoutCardProps) {
 
             {/* Clean Tracking Kit Indicator */}
             <div className="flex items-center gap-2.5 mt-1 text-[11px] font-sans text-slate-400 flex-wrap">
-              <span className="flex items-center gap-1 text-orange-400 font-semibold">
-                <Footprints className="w-3.5 h-3.5" />
-                Zapatillas Naranja
-              </span>
-              <span>•</span>
-              <span>Camiseta Negra</span>
+              {player.kitDescription ? (
+                <span className="flex items-center gap-1.5 text-slate-200 font-medium">
+                  <Footprints className="w-3.5 h-3.5 text-volt shrink-0" />
+                  <span>{player.kitDescription}</span>
+                  {player.detectedColor && (
+                    <span className="text-[10px] font-mono text-telemetry-cyan bg-telemetry-cyan/10 border border-telemetry-cyan/30 px-1.5 py-0.5 rounded-xs uppercase">
+                      IA: {player.detectedColor}
+                    </span>
+                  )}
+                </span>
+              ) : (
+                <>
+                  <span className="flex items-center gap-1 text-orange-400 font-semibold">
+                    <Footprints className="w-3.5 h-3.5" />
+                    Calzado: {player.bootsColor || 'Estándar'}
+                  </span>
+                  <span>•</span>
+                  <span>Camiseta: {player.shirtColor || 'Equipo'}</span>
+                </>
+              )}
               <span>•</span>
               <span className="flex items-center gap-1 font-mono text-slate-400">
                 <Clock className="w-3 h-3 text-volt" />

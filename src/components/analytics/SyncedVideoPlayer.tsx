@@ -11,35 +11,55 @@ import {
   Tv,
   Sparkles,
   Play,
-  Volume2,
+  Pause,
+  Video as VideoIcon,
+  Crosshair,
 } from 'lucide-react';
 
 export interface SyncedVideoPlayerProps {
   youtubeId?: string;
   videoUrl?: string;
+  localVideoUrl?: string | null;
+  isOpticalTracking?: boolean;
   targetSeconds?: number | null;
   onTargetConsumed?: () => void;
+  onDurationDetected?: (durationSeconds: number) => void;
   className?: string;
 }
 
 export function SyncedVideoPlayer({
   youtubeId,
   videoUrl,
+  localVideoUrl,
+  isOpticalTracking = false,
   targetSeconds,
   onTargetConsumed,
+  onDurationDetected,
   className,
 }: SyncedVideoPlayerProps) {
+  // Determinar si es video local (blob, archivo .mp4 directo o prop explícito)
+  const isLocalVideo = Boolean(
+    localVideoUrl ||
+      (videoUrl && (videoUrl.startsWith('blob:') || videoUrl.endsWith('.mp4')))
+  );
+
+  const effectiveLocalUrl = localVideoUrl || (isLocalVideo ? videoUrl : null);
+
   const effectiveYoutubeId =
     youtubeId || (videoUrl ? extractYouTubeId(videoUrl) : null) || '-eI9ZUNdxgw';
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   const [currentPlayhead, setCurrentPlayhead] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isIframeReady, setIsIframeReady] = useState(false);
   const [isStickyMobile, setIsStickyMobile] = useState(false);
   const pendingSeekRef = useRef<number | null>(null);
 
   // Send command to YouTube iframe via standard postMessage API
-  const sendCommand = useCallback((func: string, args: any[] = []) => {
+  const sendYouTubeCommand = useCallback(
+    (func: string, args: (string | number | boolean)[] = []) => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
       try {
         iframeRef.current.contentWindow.postMessage(
@@ -56,35 +76,52 @@ export function SyncedVideoPlayer({
     }
   }, []);
 
-  // Smoothly seek video to target seconds without reloading the iframe
+  useEffect(() => {
+    setCurrentPlayhead(0);
+    setIsPlaying(false);
+  }, [effectiveLocalUrl, effectiveYoutubeId]);
+
+  // Smoothly seek video to target seconds without reloading
   const seekToSecond = useCallback(
     (seconds: number) => {
       setCurrentPlayhead(seconds);
-      sendCommand('seekTo', [seconds, true]);
-      sendCommand('playVideo', []);
+
+      if (isLocalVideo && videoRef.current) {
+        try {
+          videoRef.current.currentTime = seconds;
+          videoRef.current.play().catch(() => {});
+          setIsPlaying(true);
+        } catch (e) {
+          console.warn('Error seeking local video:', e);
+        }
+      } else {
+        sendYouTubeCommand('seekTo', [seconds, true]);
+        sendYouTubeCommand('playVideo', []);
+        setIsPlaying(true);
+      }
     },
-    [sendCommand]
+    [isLocalVideo, sendYouTubeCommand]
   );
 
   // Listen to iframe load event to handshake with YouTube API
   const handleIframeLoad = () => {
     setIsIframeReady(true);
-    // Handshake: tell YouTube this parent window is listening
     if (iframeRef.current && iframeRef.current.contentWindow) {
       iframeRef.current.contentWindow.postMessage(
         JSON.stringify({ event: 'listening' }),
         '*'
       );
     }
-    // If user clicked a timestamp before the iframe finished loading, execute it now
     if (pendingSeekRef.current !== null) {
       seekToSecond(pendingSeekRef.current);
       pendingSeekRef.current = null;
     }
   };
 
-  // Listen to message events from YouTube iframe to track currentTime in real time
+  // Listen to message events from YouTube iframe
   useEffect(() => {
+    if (isLocalVideo) return;
+
     const handleMessage = (event: MessageEvent) => {
       try {
         if (typeof event.data !== 'string') return;
@@ -99,9 +136,9 @@ export function SyncedVideoPlayer({
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, []);
+  }, [isLocalVideo]);
 
-  // When targetSeconds changes from outside (event marker click, timestamp chip)
+  // When targetSeconds changes from outside (pines en cancha, tarjetas de jugada o drills)
   useEffect(() => {
     if (targetSeconds !== undefined && targetSeconds !== null) {
       seekToSecond(targetSeconds);
@@ -115,8 +152,26 @@ export function SyncedVideoPlayer({
     seekToSecond(target);
   };
 
-  // The embed URL is 100% FIXED and STABLE.
-  // It NEVER changes when seeking, preventing any iframe reloads or black screens.
+  const handleTogglePlay = () => {
+    if (isLocalVideo && videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+        setIsPlaying(true);
+      } else {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      }
+    } else {
+      if (isPlaying) {
+        sendYouTubeCommand('pauseVideo');
+        setIsPlaying(false);
+      } else {
+        sendYouTubeCommand('playVideo');
+        setIsPlaying(true);
+      }
+    }
+  };
+
   const embedUrl = `https://www.youtube.com/embed/${effectiveYoutubeId}?enablejsapi=1&playsinline=1&rel=0&modestbranding=1`;
 
   return (
@@ -127,17 +182,33 @@ export function SyncedVideoPlayer({
         isStickyMobile
           ? 'fixed bottom-16 right-4 w-72 z-50 shadow-2xl border-volt'
           : ''
-      } ${className}`}
+      } ${className || ''}`}
     >
       {/* Broadcast Header Strip */}
       <div className="flex items-center justify-between px-3 py-2 bg-stadium-elevated border-b border-stadium-border text-xs">
         <div className="flex items-center gap-2">
-          <Badge variant="volt" size="sm" pulse>
-            LIVE SYNC
-          </Badge>
+          {isOpticalTracking || isLocalVideo ? (
+            <Badge variant="volt" size="sm" pulse>
+              TRACKING ÓPTICO YOLOv8
+            </Badge>
+          ) : (
+            <Badge variant="volt" size="sm" pulse>
+              LIVE SYNC
+            </Badge>
+          )}
+
           <span className="font-display uppercase tracking-wider font-bold text-white flex items-center gap-1.5">
-            <Tv className="w-3.5 h-3.5 text-telemetry-cyan" />
-            Cámara Táctica Cenital
+            {isLocalVideo ? (
+              <>
+                <VideoIcon className="w-3.5 h-3.5 text-volt" />
+                Video Local (.mp4)
+              </>
+            ) : (
+              <>
+                <Tv className="w-3.5 h-3.5 text-telemetry-cyan" />
+                Cámara Táctica Cenital
+              </>
+            )}
           </span>
         </div>
 
@@ -156,21 +227,51 @@ export function SyncedVideoPlayer({
       </div>
 
       {/* Video Container (16:9 aspect ratio) */}
-      <div className="relative w-full aspect-video bg-black">
-        <iframe
-          ref={iframeRef}
-          src={embedUrl}
-          title="Video de Análisis Táctico - Pandass Cup"
-          className="absolute inset-0 w-full h-full border-0 block"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerPolicy="strict-origin-when-cross-origin"
-          allowFullScreen
-          onLoad={handleIframeLoad}
-        />
+      <div className="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+        {isLocalVideo && effectiveLocalUrl ? (
+          <video
+            key={effectiveLocalUrl}
+            ref={videoRef}
+            src={effectiveLocalUrl}
+            controls
+            playsInline
+            onLoadedMetadata={(e) => {
+              const dur = e.currentTarget.duration;
+              if (Number.isFinite(dur) && dur > 0) {
+                onDurationDetected?.(dur);
+              }
+            }}
+            onTimeUpdate={(e) => {
+              setCurrentPlayhead(Math.floor(e.currentTarget.currentTime));
+            }}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            className="w-full h-full object-contain bg-black"
+          />
+        ) : (
+          <iframe
+            key={effectiveYoutubeId}
+            ref={iframeRef}
+            src={embedUrl}
+            title="Video de Análisis Táctico"
+            className="absolute inset-0 w-full h-full border-0 block"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+            onLoad={handleIframeLoad}
+          />
+        )}
 
         {/* Telemetry watermark overlay */}
-        <div className="pointer-events-none absolute bottom-2 right-2 px-2 py-0.5 rounded-xs bg-stadium-base/80 border border-stadium-border text-[9px] font-display uppercase tracking-widest text-slate-400 backdrop-blur-sm z-10">
-          DEPOR-ANALYTICS SYNC
+        <div className="pointer-events-none absolute bottom-2 right-2 px-2 py-0.5 rounded-xs bg-stadium-base/80 border border-stadium-border text-[9px] font-display uppercase tracking-widest text-slate-400 backdrop-blur-sm z-10 flex items-center gap-1">
+          {isOpticalTracking ? (
+            <>
+              <Crosshair className="w-2.5 h-2.5 text-volt" />
+              <span>YOLOv8 + BYTETRACK SYNC</span>
+            </>
+          ) : (
+            <span>SPORT INTELLIGENCE SYNC</span>
+          )}
         </div>
       </div>
 
@@ -196,12 +297,21 @@ export function SyncedVideoPlayer({
           </button>
 
           <button
-            onClick={() => sendCommand('playVideo')}
+            onClick={handleTogglePlay}
             className="flex items-center gap-1 px-2.5 py-1 rounded-xs bg-volt/15 hover:bg-volt text-volt hover:text-stadium-base text-xs font-display uppercase tracking-wider font-bold transition-colors cursor-pointer ml-1"
-            title="Reproducir video"
+            title="Reproducir o pausar"
           >
-            <Play className="w-3 h-3 fill-current" />
-            <span>Play</span>
+            {isPlaying ? (
+              <>
+                <Pause className="w-3 h-3 fill-current" />
+                <span>Pausa</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3 h-3 fill-current" />
+                <span>Play</span>
+              </>
+            )}
           </button>
         </div>
 

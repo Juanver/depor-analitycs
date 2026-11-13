@@ -14,6 +14,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { projectToPitch } from '@/lib/pitchCoordinates';
 
 export interface EventMarkersProps {
   events: TacticalEvent[];
@@ -103,6 +104,7 @@ export function EventMarkers({
       {events.map((ev) => {
         const config = EVENT_CONFIG[ev.type] || EVENT_CONFIG.pass;
         const isSelected = activeEventId === ev.id || hoveredEventId === ev.id;
+        const { cx, cy } = projectToPitch(ev.x, ev.y);
 
         return (
           <g
@@ -117,17 +119,17 @@ export function EventMarkers({
           >
             {/* Outer glowing white telemetry ring */}
             <circle
-              cx={ev.x}
-              cy={ev.y}
-              r={isSelected ? 4.2 : 2.8}
+              cx={cx}
+              cy={cy}
+              r={isSelected ? 34 : 24}
               fill="none"
               stroke="rgba(255, 255, 255, 0.85)"
-              strokeWidth="0.35"
+              strokeWidth="2.8"
               opacity={isSelected ? 0.95 : 0.6}
             >
               <animate
                 attributeName="r"
-                values={`${isSelected ? 3.8 : 2.4};${isSelected ? 6.2 : 4.6};${isSelected ? 3.8 : 2.4}`}
+                values={`${isSelected ? 30 : 20};${isSelected ? 48 : 38};${isSelected ? 30 : 20}`}
                 dur="2.2s"
                 repeatCount="indefinite"
               />
@@ -141,16 +143,16 @@ export function EventMarkers({
 
             {/* Event core pin with crisp white glowing border */}
             <circle
-              cx={ev.x}
-              cy={ev.y}
-              r={isSelected ? 2.3 : 1.7}
+              cx={cx}
+              cy={cy}
+              r={isSelected ? 19 : 14}
               fill={ev.success ? config.color : 'var(--color-thermal-high)'}
               stroke="#FFFFFF"
-              strokeWidth="0.45"
+              strokeWidth="3.5"
               style={{
                 filter: isSelected
-                  ? 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.8))'
-                  : 'drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))',
+                  ? 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))'
+                  : 'drop-shadow(0 0 4px rgba(0, 0, 0, 0.6))',
               }}
             />
           </g>

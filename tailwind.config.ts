@@ -45,6 +45,12 @@ const config: Config = {
           line: "var(--color-pitch-line)",
           "line-faint": "var(--color-pitch-line-faint)",
         },
+        brand: {
+          lime: "#A6FF00",
+          navy: "#0B1F44",
+          white: "#FFFFFF",
+          gray: "#6B7280",
+        },
       },
       fontFamily: {
         display: ["var(--font-display)", "sans-serif"],
@@ -69,9 +75,9 @@ const config: Config = {
         "tactical-grid":
           "linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px)",
         "volt-gradient":
-          "linear-gradient(135deg, var(--color-volt) 0%, #65A30D 100%)",
+          "linear-gradient(135deg, #A6FF00 0%, #7ACC00 100%)",
         "cyan-gradient":
-          "linear-gradient(135deg, var(--color-telemetry-cyan) 0%, #0284C7 100%)",
+          "linear-gradient(135deg, var(--color-telemetry-cyan) 0%, #0B1F44 100%)",
         "card-sheen":
           "linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%)",
       },

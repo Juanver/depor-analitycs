@@ -2,7 +2,26 @@
 
 import React from 'react';
 import { cn } from '@/lib/cn';
-import { ArrowRight, Shield, Target, Compass } from 'lucide-react';
+import { ArrowRight, Shield, Target } from 'lucide-react';
+import {
+  PITCH_VIEWBOX_WIDTH,
+  PITCH_VIEWBOX_HEIGHT,
+  FIELD_X,
+  FIELD_Y,
+  FIELD_WIDTH,
+  FIELD_HEIGHT,
+  projectToPitch,
+} from '@/lib/pitchCoordinates';
+
+export {
+  PITCH_VIEWBOX_WIDTH,
+  PITCH_VIEWBOX_HEIGHT,
+  FIELD_X,
+  FIELD_Y,
+  FIELD_WIDTH,
+  FIELD_HEIGHT,
+  projectToPitch,
+};
 
 export interface SoccerPitchSVGProps {
   className?: string;
@@ -11,13 +30,14 @@ export interface SoccerPitchSVGProps {
   teamName?: string;
   opponentTeamName?: string;
   matchFormat?: string;
+  centroid?: { x: number; y: number } | null;
   children?: React.ReactNode;
 }
 
 /**
- * 2D Overhead Football Pitch rendered to standard FIFA proportions (100m length x 68m width).
- * Features high-contrast tactical telemetry lines, alternating mowing lawn bands,
- * and unmistakably distinct broadcast markings for ARCO PROPIO vs ARCO RIVAL.
+ * Cancha 2D Cenital con Sistema de Coordenadas Unificado (viewBox="0 0 1000 680").
+ * Rectángulo de juego: FIELD_X=40, FIELD_Y=30, FIELD_WIDTH=920, FIELD_HEIGHT=620.
+ * Trazado dinámico adaptado a Fútbol 5/7 (área única) o Fútbol 9/11 (área grande + chica).
  */
 export function SoccerPitchSVG({
   className,
@@ -25,16 +45,38 @@ export function SoccerPitchSVG({
   attackDirectionText = 'DIRECCIÓN DE ATAQUE',
   teamName = 'DIBUJITOS FC',
   opponentTeamName = 'RIVAL',
-  matchFormat,
+  matchFormat = 'Fútbol 7',
+  centroid,
   children,
 }: SoccerPitchSVGProps) {
-  // 10 mowing lawn stripes across length (100 units / 10 = 10 units each)
-  const stripes = Array.from({ length: 10 }, (_, i) => i * 10);
+  // 10 franjas verticales alternadas sobre el largo del campo (1000 / 10 = 100px cada una)
+  const stripes = Array.from({ length: 10 }, (_, i) => i * 100);
+
+  const normalizedFormat = (matchFormat || '').toLowerCase();
+  const isSmallSided =
+    normalizedFormat.includes('5') || normalizedFormat.includes('7');
+
+  const midX = FIELD_X + FIELD_WIDTH / 2; // 500
+  const midY = FIELD_Y + FIELD_HEIGHT / 2; // 340
+
+  // Dimensiones proporcionales según modalidad
+  const centerCircleRadius = isSmallSided ? 64 : 88;
+  const penWidth = isSmallSided ? 128 : 152;
+  const penHeight = isSmallSided ? 310 : 372;
+  const penTopY = midY - penHeight / 2;
+  const penSpotOffset = isSmallSided ? 88 : 102;
+  const goalWidth = 18;
+  const goalHeight = isSmallSided ? 96 : 112;
+  const goalTopY = midY - goalHeight / 2;
+
+  const projectedCentroid = centroid
+    ? projectToPitch(centroid.x, centroid.y)
+    : null;
 
   return (
     <div
       className={cn(
-        'relative w-full aspect-[100/68] select-none overflow-hidden rounded-lg border border-stadium-border shadow-stadium flex flex-col bg-[#081C15]',
+        'relative w-full aspect-[1000/680] select-none overflow-hidden rounded-lg border border-stadium-border shadow-stadium flex flex-col bg-[#081C15]',
         className
       )}
     >
@@ -82,290 +124,302 @@ export function SoccerPitchSVG({
         </div>
       </div>
 
-      {/* SVG Canvas (100x68 Pitch) */}
+      {/* SVG Canvas (1000 x 680 Unified Coordinate Space) */}
       <svg
-        viewBox="0 0 100 68"
+        viewBox={`0 0 ${PITCH_VIEWBOX_WIDTH} ${PITCH_VIEWBOX_HEIGHT}`}
         preserveAspectRatio="xMidYMid meet"
         className="w-full h-auto block"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          {/* Pitch background clipping */}
-          <clipPath id="pitch-clip">
-            <rect x="0" y="0" width="100" height="68" rx="1.5" />
+          {/* Clipping del lienzo completo */}
+          <clipPath id="pitch-canvas-clip">
+            <rect
+              x="0"
+              y="0"
+              width={PITCH_VIEWBOX_WIDTH}
+              height={PITCH_VIEWBOX_HEIGHT}
+              rx="12"
+            />
           </clipPath>
 
-          {/* Tactical grid overlay pattern */}
-          <pattern id="tactical-mesh" width="10" height="6.8" patternUnits="userSpaceOnUse">
-            <rect width="10" height="6.8" fill="none" stroke="rgba(255, 255, 255, 0.02)" strokeWidth="0.15" />
+          {/* Clipping estricto al interior de las líneas de cal para capas de datos */}
+          <clipPath id="field-interior-clip">
+            <rect
+              x={FIELD_X - 8}
+              y={FIELD_Y - 8}
+              width={FIELD_WIDTH + 16}
+              height={FIELD_HEIGHT + 16}
+            />
+          </clipPath>
+
+          {/* Grilla táctica sutil */}
+          <pattern
+            id="tactical-mesh"
+            width="92"
+            height="62"
+            patternUnits="userSpaceOnUse"
+          >
+            <rect
+              width="92"
+              height="62"
+              fill="none"
+              stroke="rgba(255, 255, 255, 0.025)"
+              strokeWidth="1"
+            />
           </pattern>
 
-          {/* Goal Net Hexagonal Pattern */}
-          <pattern id="goal-net" width="0.8" height="0.8" patternUnits="userSpaceOnUse">
-            <path d="M 0 0.8 L 0.8 0 M 0 0 L 0.8 0.8" stroke="rgba(255, 255, 255, 0.3)" strokeWidth="0.1" />
+          {/* Red de portería */}
+          <pattern
+            id="goal-net"
+            width="6"
+            height="6"
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              d="M 0 6 L 6 0 M 0 0 L 6 6"
+              stroke="rgba(255, 255, 255, 0.35)"
+              strokeWidth="0.8"
+            />
           </pattern>
         </defs>
 
-        <g clipPath="url(#pitch-clip)">
-          {/* Alternating Grass Mowing Bands (#0A1F16 / #0D261B) */}
+        <g clipPath="url(#pitch-canvas-clip)">
+          {/* Césped nocturno #081C15 con 10 franjas verticales alternadas #0B241B */}
           {stripes.map((stripeX, idx) => (
             <rect
               key={`stripe-${idx}`}
               x={stripeX}
               y="0"
-              width="10"
-              height="68"
-              fill={idx % 2 === 0 ? 'var(--color-pitch-dark)' : 'var(--color-pitch-light)'}
+              width="100"
+              height={PITCH_VIEWBOX_HEIGHT}
+              fill={idx % 2 === 0 ? '#081C15' : '#0B241B'}
             />
           ))}
 
-          {/* Subtle grid mesh */}
-          <rect x="0" y="0" width="100" height="68" fill="url(#tactical-mesh)" />
+          {/* Grilla táctica sutil */}
+          <rect
+            x={FIELD_X}
+            y={FIELD_Y}
+            width={FIELD_WIDTH}
+            height={FIELD_HEIGHT}
+            fill="url(#tactical-mesh)"
+          />
 
-          {/* Half-pitch Background Ambient Tints */}
-          {/* Defensive Half (Cyan Tint) */}
-          <rect x="2" y="2" width="48" height="64" fill="rgba(34, 211, 238, 0.015)" />
-          {/* Offensive Half (Volt Tint) */}
-          <rect x="50" y="2" width="48" height="64" fill="rgba(163, 230, 53, 0.025)" />
+          {/* Tintes ambientales sutiles por mitad de campo */}
+          <rect
+            x={FIELD_X}
+            y={FIELD_Y}
+            width={FIELD_WIDTH / 2}
+            height={FIELD_HEIGHT}
+            fill="rgba(34, 211, 238, 0.015)"
+          />
+          <rect
+            x={midX}
+            y={FIELD_Y}
+            width={FIELD_WIDTH / 2}
+            height={FIELD_HEIGHT}
+            fill="rgba(163, 230, 53, 0.02)"
+          />
 
-          {/* Tactical Pitch Markings (Crisp white lines with slight glow) */}
+          {/* Líneas de Cal Reglamentarias */}
           <g
-            stroke="var(--color-pitch-line)"
-            strokeWidth="0.4"
+            stroke="rgba(255, 255, 255, 0.78)"
+            strokeWidth="2.5"
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            {/* Outer Boundary */}
-            <rect x="2" y="2" width="96" height="64" />
-
-            {/* Halfway Line */}
-            <line x1="50" y1="2" x2="50" y2="66" />
-
-            {/* Center Circle (Radius ~9.15m in 100x68 scale) */}
-            <circle cx="50" cy="34" r="9.15" />
-
-            {/* Center Spot */}
-            <circle cx="50" cy="34" r="0.6" fill="var(--color-pitch-line)" />
-
-            {/* Left Penalty Area (16.5m deep, 40.3m wide centered: y from 13.85 to 54.15) */}
-            <rect x="2" y="13.85" width="16.5" height="40.3" />
-
-            {/* Left Goal Area (5.5m deep, 18.32m wide centered: y from 24.84 to 43.16) */}
-            <rect x="2" y="24.84" width="5.5" height="18.32" />
-
-            {/* Left Penalty Spot (11m from goal line) */}
-            <circle cx="13" cy="34" r="0.6" fill="var(--color-pitch-line)" />
-
-            {/* Left Penalty Arc */}
-            <path d="M 18.5 27.5 A 9.15 9.15 0 0 1 18.5 40.5" />
-
-            {/* Right Penalty Area */}
-            <rect x="81.5" y="13.85" width="16.5" height="40.3" />
-
-            {/* Right Goal Area */}
-            <rect x="92.5" y="24.84" width="5.5" height="18.32" />
-
-            {/* Right Penalty Spot */}
-            <circle cx="87" cy="34" r="0.6" fill="var(--color-pitch-line)" />
-
-            {/* Right Penalty Arc */}
-            <path d="M 81.5 27.5 A 9.15 9.15 0 0 0 81.5 40.5" />
-
-            {/* Corner Arcs (1m radius) */}
-            <path d="M 3 2 A 1 1 0 0 1 2 3" />
-            <path d="M 2 65 A 1 1 0 0 1 3 66" />
-            <path d="M 97 2 A 1 1 0 0 0 98 3" />
-            <path d="M 98 65 A 1 1 0 0 0 97 66" />
-          </g>
-
-          {/* ============================================================== */}
-          {/* HIGH IMPACT VISUAL MARKINGS: ARCO PROPIO vs ARCO RIVAL         */}
-          {/* ============================================================== */}
-
-          {/* Tactical Attack Vector Corridor (ARCO PROPIO -> DIRECCIÓN DE ATAQUE -> ARCO RIVAL) */}
-          <g id="tactical-vector-corridor" opacity="0.65">
-            {/* Subtle dashed arrow along central corridor */}
-            <line
-              x1="24"
-              y1="5"
-              x2="76"
-              y2="5"
-              stroke="rgba(163, 230, 53, 0.45)"
-              strokeWidth="0.35"
-              strokeDasharray="1.5 1.5"
-            />
-            <polygon
-              points="76,4.2 78.5,5 76,5.8"
-              fill="rgba(163, 230, 53, 0.75)"
-            />
-            <text
-              x="50"
-              y="5.3"
-              fill="rgba(163, 230, 53, 0.75)"
-              fontFamily="var(--font-display)"
-              fontSize="1.3"
-              fontWeight="800"
-              textAnchor="middle"
-              letterSpacing="0.1em"
-            >
-              DIRECCIÓN DE ATAQUE ►
-            </text>
-          </g>
-
-          {/* LEFT GOAL: ARCO PROPIO (Cyan / Defensive Shield) */}
-          <g id="left-goal-telemetry">
-            {/* Goal Net fill with cyan glow */}
+            {/* Rectángulo Exterior de Juego */}
             <rect
-              x="0.2"
-              y="29.5"
-              width="2"
-              height="9"
+              x={FIELD_X}
+              y={FIELD_Y}
+              width={FIELD_WIDTH}
+              height={FIELD_HEIGHT}
+            />
+
+            {/* Línea Media */}
+            <line
+              x1={midX}
+              y1={FIELD_Y}
+              x2={midX}
+              y2={FIELD_Y + FIELD_HEIGHT}
+            />
+
+            {/* Círculo Central */}
+            <circle cx={midX} cy={midY} r={centerCircleRadius} />
+            <circle
+              cx={midX}
+              cy={midY}
+              r="4.5"
+              fill="rgba(255, 255, 255, 0.85)"
+            />
+
+            {/* Área Penal Izquierda (Arco Propio) */}
+            <rect
+              x={FIELD_X}
+              y={penTopY}
+              width={penWidth}
+              height={penHeight}
+            />
+            <circle
+              cx={FIELD_X + penSpotOffset}
+              cy={midY}
+              r="4"
+              fill="rgba(255, 255, 255, 0.85)"
+            />
+
+            {/* Área Penal Derecha (Arco Rival) */}
+            <rect
+              x={FIELD_X + FIELD_WIDTH - penWidth}
+              y={penTopY}
+              width={penWidth}
+              height={penHeight}
+            />
+            <circle
+              cx={FIELD_X + FIELD_WIDTH - penSpotOffset}
+              cy={midY}
+              r="4"
+              fill="rgba(255, 255, 255, 0.85)"
+            />
+
+            {/* Trazado exclusivo Fútbol 9 / Fútbol 11: Área Chica + Semicírculos Penales */}
+            {!isSmallSided && (
+              <>
+                {/* Área Chica Izquierda */}
+                <rect
+                  x={FIELD_X}
+                  y={midY - 84}
+                  width="52"
+                  height="168"
+                />
+                {/* Área Chica Derecha */}
+                <rect
+                  x={FIELD_X + FIELD_WIDTH - 52}
+                  y={midY - 84}
+                  width="52"
+                  height="168"
+                />
+                {/* Semicírculo Penal Izquierdo */}
+                <path
+                  d={`M ${FIELD_X + penWidth} ${midY - 68} A 82 82 0 0 1 ${FIELD_X + penWidth} ${midY + 68}`}
+                />
+                {/* Semicírculo Penal Derecho */}
+                <path
+                  d={`M ${FIELD_X + FIELD_WIDTH - penWidth} ${midY - 68} A 82 82 0 0 0 ${FIELD_X + FIELD_WIDTH - penWidth} ${midY + 68}`}
+                />
+              </>
+            )}
+
+            {/* Arcos de Córner */}
+            <path d={`M ${FIELD_X} ${FIELD_Y + 14} A 14 14 0 0 0 ${FIELD_X + 14} ${FIELD_Y}`} />
+            <path d={`M ${FIELD_X + FIELD_WIDTH - 14} ${FIELD_Y} A 14 14 0 0 0 ${FIELD_X + FIELD_WIDTH} ${FIELD_Y + 14}`} />
+            <path d={`M ${FIELD_X} ${FIELD_Y + FIELD_HEIGHT - 14} A 14 14 0 0 1 ${FIELD_X + 14} ${FIELD_Y + FIELD_HEIGHT}`} />
+            <path d={`M ${FIELD_X + FIELD_WIDTH - 14} ${FIELD_Y + FIELD_HEIGHT} A 14 14 0 0 1 ${FIELD_X + FIELD_WIDTH} ${FIELD_Y + FIELD_HEIGHT - 14}`} />
+          </g>
+
+          {/* Portería Izquierda (Arco Propio - Cian) */}
+          <g>
+            <rect
+              x={FIELD_X - goalWidth}
+              y={goalTopY}
+              width={goalWidth}
+              height={goalHeight}
               fill="url(#goal-net)"
               stroke="#22D3EE"
-              strokeWidth="0.5"
+              strokeWidth="2.5"
             />
-            <rect
-              x="0.2"
-              y="29.5"
-              width="2"
-              height="9"
-              fill="rgba(34, 211, 238, 0.25)"
-            />
-
-            {/* Goal Line Glow Accent */}
-            <line x1="2" y1="29.5" x2="2" y2="38.5" stroke="#22D3EE" strokeWidth="0.9" />
-
-            {/* Pitch Grass Inscriptions (Large Tactical Watermark) */}
-            <text
-              x="8.5"
-              y="32.5"
-              fill="rgba(34, 211, 238, 0.55)"
-              fontFamily="var(--font-display)"
-              fontSize="2.4"
-              fontWeight="900"
-              textAnchor="middle"
-              letterSpacing="0.08em"
-            >
-              🛡️ ARCO PROPIO
-            </text>
-            <text
-              x="8.5"
-              y="35.5"
-              fill="rgba(255, 255, 255, 0.4)"
-              fontFamily="var(--font-display)"
-              fontSize="1.6"
-              fontWeight="700"
-              textAnchor="middle"
-              letterSpacing="0.05em"
-            >
-              {teamName.toUpperCase()}
-            </text>
-            <text
-              x="8.5"
-              y="38"
-              fill="rgba(34, 211, 238, 0.35)"
-              fontFamily="var(--font-mono)"
-              fontSize="1.2"
-              textAnchor="middle"
-            >
-              [ZONA DEFENSIVA]
-            </text>
           </g>
 
-          {/* RIGHT GOAL: ARCO RIVAL (Volt / Offensive Target) */}
-          <g id="right-goal-telemetry">
-            {/* Goal Net fill with Volt glow */}
+          {/* Portería Derecha (Arco Rival - Volt) */}
+          <g>
             <rect
-              x="97.8"
-              y="29.5"
-              width="2"
-              height="9"
+              x={FIELD_X + FIELD_WIDTH}
+              y={goalTopY}
+              width={goalWidth}
+              height={goalHeight}
               fill="url(#goal-net)"
               stroke="#A3E635"
-              strokeWidth="0.5"
+              strokeWidth="2.5"
             />
-            <rect
-              x="97.8"
-              y="29.5"
-              width="2"
-              height="9"
-              fill="rgba(163, 230, 53, 0.35)"
-            />
-
-            {/* Goal Line Glow Accent */}
-            <line x1="98" y1="29.5" x2="98" y2="38.5" stroke="#A3E635" strokeWidth="0.9" />
-
-            {/* Target Reticle concentric pulses right in front of the goal */}
-            <circle cx="95" cy="34" r="2.4" fill="none" stroke="rgba(163, 230, 53, 0.25)" strokeWidth="0.25" strokeDasharray="0.8 0.8" />
-            <circle cx="95" cy="34" r="1.2" fill="none" stroke="rgba(163, 230, 53, 0.4)" strokeWidth="0.2" />
-
-            {/* Pitch Grass Inscriptions (Large Tactical Watermark) */}
-            <text
-              x="91.5"
-              y="32.5"
-              fill="rgba(163, 230, 53, 0.85)"
-              fontFamily="var(--font-display)"
-              fontSize="2.4"
-              fontWeight="900"
-              textAnchor="middle"
-              letterSpacing="0.08em"
-            >
-              🎯 ARCO RIVAL
-            </text>
-            <text
-              x="91.5"
-              y="35.5"
-              fill="rgba(255, 255, 255, 0.6)"
-              fontFamily="var(--font-display)"
-              fontSize="1.6"
-              fontWeight="700"
-              textAnchor="middle"
-              letterSpacing="0.05em"
-            >
-              {opponentTeamName.toUpperCase()}
-            </text>
-            <text
-              x="91.5"
-              y="38"
-              fill="rgba(163, 230, 53, 0.6)"
-              fontFamily="var(--font-mono)"
-              fontSize="1.2"
-              textAnchor="middle"
-            >
-              [OBJETIVO DE ATAQUE]
-            </text>
           </g>
 
-          {/* Pitch Field Halves Watermark Banners */}
-          <text
-            x="28"
-            y="64.5"
-            fill="rgba(34, 211, 238, 0.25)"
-            fontFamily="var(--font-display)"
-            fontSize="1.6"
-            fontWeight="700"
-            textAnchor="middle"
-            letterSpacing="0.08em"
-          >
-            ◄ CAMPO PROPIO
-          </text>
-          <text
-            x="72"
-            y="64.5"
-            fill="rgba(163, 230, 53, 0.35)"
-            fontFamily="var(--font-display)"
-            fontSize="1.6"
-            fontWeight="700"
-            textAnchor="middle"
-            letterSpacing="0.08em"
-          >
-            CAMPO RIVAL (ATAQUE) ►
-          </text>
-        </g>
+          {/* Capas Hijas (Mapa de Calor + Marcadores de Eventos) */}
+          <g clipPath="url(#field-interior-clip)">{children}</g>
 
-        {/* Dynamic Layers (Heatmap & Event Markers passed as children) */}
-        {children}
+          {/* Marcador Táctico de Centroide Colectivo (Modo Equipo) */}
+          {projectedCentroid && centroid && (
+            <g className="pointer-events-none">
+              <circle
+                cx={projectedCentroid.cx}
+                cy={projectedCentroid.cy}
+                r="22"
+                fill="rgba(34, 211, 238, 0.14)"
+                stroke="#22D3EE"
+                strokeWidth="2"
+                strokeDasharray="5 4"
+              />
+              <line
+                x1={projectedCentroid.cx - 12}
+                y1={projectedCentroid.cy}
+                x2={projectedCentroid.cx + 12}
+                y2={projectedCentroid.cy}
+                stroke="#22D3EE"
+                strokeWidth="2"
+              />
+              <line
+                x1={projectedCentroid.cx}
+                y1={projectedCentroid.cy - 12}
+                x2={projectedCentroid.cx}
+                y2={projectedCentroid.cy + 12}
+                stroke="#22D3EE"
+                strokeWidth="2"
+              />
+              <circle
+                cx={projectedCentroid.cx}
+                cy={projectedCentroid.cy}
+                r="6"
+                fill="#22D3EE"
+                stroke="#070B0E"
+                strokeWidth="2"
+              />
+
+              {/* Etiqueta flotante del Centroide */}
+              <g
+                transform={`translate(${Math.min(
+                  FIELD_X + FIELD_WIDTH - 210,
+                  Math.max(FIELD_X + 10, projectedCentroid.cx - 100)
+                )}, ${
+                  projectedCentroid.cy < 95
+                    ? projectedCentroid.cy + 28
+                    : projectedCentroid.cy - 48
+                })`}
+              >
+                <rect
+                  x="0"
+                  y="0"
+                  width="200"
+                  height="24"
+                  rx="4"
+                  fill="rgba(7, 11, 14, 0.92)"
+                  stroke="#22D3EE"
+                  strokeWidth="1.2"
+                />
+                <text
+                  x="100"
+                  y="15.5"
+                  textAnchor="middle"
+                  fill="#22D3EE"
+                  fontSize="10.5"
+                  fontWeight="700"
+                  fontFamily="monospace"
+                >
+                  {`CENTROIDE BLOQUE (${centroid.x.toFixed(1)}, ${centroid.y.toFixed(1)})`}
+                </text>
+              </g>
+            </g>
+          )}
+        </g>
       </svg>
     </div>
   );

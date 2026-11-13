@@ -14,8 +14,9 @@ export type EventCategory = 'offensive' | 'defensive' | 'distribution' | 'transi
 export type TacticalImpact = 'high' | 'medium' | 'low';
 
 export interface HeatmapPoint {
+  t?: number; // timestamp in seconds
   x: number; // 0 to 100 (% of pitch length)
-  y: number; // 0 to 68 (% of pitch width)
+  y: number; // 0 to 100 (% of pitch width)
   intensity: number; // 0.1 to 1.0 (density factor)
   label?: string;
 }
@@ -83,6 +84,8 @@ export interface PlayerScoutProfile {
   shortColor?: string;
   socksColor?: string;
   bootsColor?: string;
+  kitDescription?: string;
+  detectedColor?: string;
   matchFormat?: MatchFormat;
   initialPosition: string;
   detectedRealRole: string;
@@ -148,3 +151,72 @@ export interface MatchSetupFormInput {
   initialPosition: string;
   videoFile?: File | null;
 }
+
+export interface VisionMatchContext {
+  formatoJuego: string;
+  sistemaTacticoNominal: string;
+}
+
+export interface VisionTeamBlockMetrics {
+  solidezDefensiva: number;
+  presionTrasPerdida: number;
+  amplitudBandas: number;
+  transicionOfensiva: number;
+  compactacion: number;
+}
+
+export interface VisionTeamFinding {
+  titulo: string;
+  detalle: string;
+  timestampSeconds: number;
+}
+
+export interface VisionTeamTrainingDrill {
+  titulo: string;
+  enfoque: string;
+  duracion: string;
+  descripcion: string;
+}
+
+export interface VisionTeamSummary {
+  nombreEquipo: string;
+  vestimenta: string;
+  colorFiltroAplicado?: string;
+  sistemaTacticoNominal: string;
+  sistemaTacticoDetectado: string;
+  comparativaNominalVsReal: string;
+  ratingColectivo: number;
+  identidadJuego: string;
+  metricasBloque: VisionTeamBlockMetrics;
+  fortalezasColectivas: VisionTeamFinding[];
+  debilidadesColectivas: VisionTeamFinding[];
+  ajustesEntrenamientoEquipo: VisionTeamTrainingDrill[];
+}
+
+export interface VisionTeamTelemetry {
+  jugadoresRastreadosEquipo: number;
+  centroideBloque: { x: number; y: number };
+  amplitudPorcentaje: number;
+  profundidadPorcentaje: number;
+  distanciaAcumulada: number;
+  heatmapPoints: HeatmapPoint[];
+}
+
+export interface VisionTeamResponse {
+  modo: 'equipo';
+  matchContext: VisionMatchContext;
+  teamSummary: VisionTeamSummary;
+  telemetry: VisionTeamTelemetry;
+}
+
+export interface VisionIndividualResponse {
+  modo: 'individual';
+  matchContext?: VisionMatchContext;
+  playerSummary: PlayerScoutProfile;
+  telemetry: {
+    distanciaRelativa?: string;
+    heatmapPoints: HeatmapPoint[];
+  };
+}
+
+export type VisionAnalysisPayload = VisionTeamResponse | VisionIndividualResponse;

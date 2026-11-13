@@ -177,7 +177,12 @@ export function TeamSetupForm({ onSuccess, className }: TeamSetupFormProps) {
               </label>
               <select
                 value={formData.matchFormat}
-                onChange={(e) => setFormData({ ...formData, matchFormat: e.target.value as any })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    matchFormat: e.target.value as TeamSetupFormInput['matchFormat'],
+                  })
+                }
                 className="w-full px-3 py-2 rounded-xs bg-stadium-elevated border border-stadium-border text-white text-xs font-display uppercase tracking-wider focus:border-volt focus:outline-none"
               >
                 <option value="Fútbol 7">Fútbol 7</option>

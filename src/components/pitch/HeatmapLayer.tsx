@@ -1,93 +1,201 @@
 'use client';
 
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useRef } from 'react';
 import { HeatmapPoint } from '@/types/analysis';
-import { getThermalColor, normalizeHeatmapPoints } from '@/lib/normalizeHeatmapData';
+import {
+  PITCH_VIEWBOX_WIDTH,
+  PITCH_VIEWBOX_HEIGHT,
+  projectToPitch,
+} from '@/lib/pitchCoordinates';
 
 export interface HeatmapLayerProps {
   points: HeatmapPoint[];
   opacity?: number;
   visible?: boolean;
+  showRawPoints?: boolean;
 }
 
+const CANVAS_SCALE = 0.5;
+const CANVAS_W = Math.round(PITCH_VIEWBOX_WIDTH * CANVAS_SCALE); // 500
+const CANVAS_H = Math.round(PITCH_VIEWBOX_HEIGHT * CANVAS_SCALE); // 340
+
+interface ColorStop {
+  pos: number;
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
+const THERMAL_STOPS: ColorStop[] = [
+  { pos: 0.0, r: 14, g: 165, b: 233, a: 0 },     // Transparente
+  { pos: 0.08, r: 14, g: 165, b: 233, a: 115 },  // Azul cielo / Cian suave
+  { pos: 0.25, r: 16, g: 185, b: 129, a: 175 },  // Verde esmeralda
+  { pos: 0.48, r: 250, g: 204, b: 21, a: 215 },  // Amarillo brillante
+  { pos: 0.72, r: 249, g: 115, b: 22, a: 235 },  // Naranja intenso
+  { pos: 0.90, r: 239, g: 68, b: 68, a: 248 },   // Rojo volcánico
+  { pos: 1.0, r: 255, g: 235, b: 235, a: 255 },  // Núcleo caliente rojo-blanco
+];
+
+function buildThermalLut(): Uint8ClampedArray {
+  const lut = new Uint8ClampedArray(256 * 4);
+  for (let i = 0; i < 256; i++) {
+    const t = i / 255;
+    let s0 = THERMAL_STOPS[0];
+    let s1 = THERMAL_STOPS[THERMAL_STOPS.length - 1];
+
+    for (let j = 0; j < THERMAL_STOPS.length - 1; j++) {
+      if (t >= THERMAL_STOPS[j].pos && t <= THERMAL_STOPS[j + 1].pos) {
+        s0 = THERMAL_STOPS[j];
+        s1 = THERMAL_STOPS[j + 1];
+        break;
+      }
+    }
+
+    const span = Math.max(0.0001, s1.pos - s0.pos);
+    const localT = (t - s0.pos) / span;
+
+    lut[i * 4] = Math.round(s0.r + (s1.r - s0.r) * localT);
+    lut[i * 4 + 1] = Math.round(s0.g + (s1.g - s0.g) * localT);
+    lut[i * 4 + 2] = Math.round(s0.b + (s1.b - s0.b) * localT);
+    lut[i * 4 + 3] = Math.round(s0.a + (s1.a - s0.a) * localT);
+  }
+  return lut;
+}
+
+const THERMAL_LUT = buildThermalLut();
+
 /**
- * High-performance tactical Gaussian Heatmap layer.
- * Implements feGaussianBlur with stdDeviation=5.5 and organic thermal transitions
- * (#0EA5E9 -> #10B981 -> #FACC15 -> #EF4444).
+ * Capa de Calor Térmico Real (Canvas 2D KDE + Paleta LUT Broadcast).
+ * 1. Acumula densidad espacial en canal alpha (puntos aislados = baja densidad,
+ *    zonas con alta superposición = pico máximo).
+ * 2. Traduce la densidad acumulada a escala térmica (Azul -> Verde -> Amarillo -> Naranja -> Rojo).
  */
 export function HeatmapLayer({
   points,
-  opacity = 0.88,
+  opacity = 0.9,
   visible = true,
+  showRawPoints = false,
 }: HeatmapLayerProps) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const projectedPoints = React.useMemo(
+    () =>
+      (points || []).map((pt) => {
+        const { cx, cy } = projectToPitch(pt.x, pt.y);
+        const intensity = Number.isFinite(pt.intensity)
+          ? Math.max(0.2, Math.min(1, pt.intensity))
+          : 0.75;
+        return { cx, cy, intensity };
+      }),
+    [points]
+  );
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !visible) return;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+    if (projectedPoints.length === 0) return;
+
+    // Radio y peso por punto calibrados al tamaño de la nube para que puntos aislados
+    // se vean azules/verdes y las acumulaciones reales brillen en naranja/rojo.
+    const count = projectedPoints.length;
+    const radius = count > 80 ? 27 : count > 25 ? 32 : 38;
+    const baseWeight = count > 120 ? 0.16 : count > 40 ? 0.24 : 0.42;
+
+    // Paso 1: Acumulación de densidad en canal alpha
+    for (let i = 0; i < count; i++) {
+      const pt = projectedPoints[i];
+      const px = pt.cx * CANVAS_SCALE;
+      const py = pt.cy * CANVAS_SCALE;
+      const alpha = Math.min(0.85, baseWeight * (0.7 + pt.intensity * 0.5));
+
+      const grad = ctx.createRadialGradient(px, py, 0, px, py, radius);
+      grad.addColorStop(0, `rgba(0, 0, 0, ${alpha})`);
+      grad.addColorStop(0.45, `rgba(0, 0, 0, ${alpha * 0.55})`);
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(px, py, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Paso 2: Normalización al pico real y mapeo con LUT térmica
+    const imgData = ctx.getImageData(0, 0, CANVAS_W, CANVAS_H);
+    const data = imgData.data;
+
+    let maxAlpha = 0;
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] > maxAlpha) {
+        maxAlpha = data[i];
+      }
+    }
+
+    if (maxAlpha === 0) return;
+    const normPeak = Math.max(maxAlpha, 70);
+
+    for (let i = 0; i < data.length; i += 4) {
+      const a = data[i + 3];
+      if (a <= 2) {
+        data[i + 3] = 0;
+        continue;
+      }
+      const lutIdx = Math.min(255, Math.round((a / normPeak) * 255)) * 4;
+      data[i] = THERMAL_LUT[lutIdx];
+      data[i + 1] = THERMAL_LUT[lutIdx + 1];
+      data[i + 2] = THERMAL_LUT[lutIdx + 2];
+      data[i + 3] = THERMAL_LUT[lutIdx + 3];
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+  }, [projectedPoints, visible]);
+
   if (!visible || !points || points.length === 0) return null;
 
-  const normalized = normalizeHeatmapPoints(points);
-
   return (
-    <AnimatePresence mode="wait">
-      <motion.g
-        key={`heatmap-group-${points.length}-${points[0]?.x ?? 0}-${points[points.length - 1]?.x ?? 0}`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        style={{ mixBlendMode: 'screen' }}
-        className="transition-all duration-500 ease-out"
+    <g>
+      <foreignObject
+        x="0"
+        y="0"
+        width={PITCH_VIEWBOX_WIDTH}
+        height={PITCH_VIEWBOX_HEIGHT}
+        style={{ pointerEvents: 'none' }}
       >
-        <defs>
-          {/* Gaussian blur for organic thermal dispersion */}
-          <filter id="heatmap-blur" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="5.5" result="blur" />
-            <feColorMatrix
-              type="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -4"
+        <canvas
+          ref={canvasRef}
+          width={CANVAS_W}
+          height={CANVAS_H}
+          style={{
+            width: '100%',
+            height: '100%',
+            opacity,
+            mixBlendMode: 'screen',
+            display: 'block',
+          }}
+        />
+      </foreignObject>
+
+      {/* Control de Depuración Visual: Puntos Crudos (cx, cy) */}
+      {showRawPoints && (
+        <g className="pointer-events-none">
+          {projectedPoints.map((pt, idx) => (
+            <circle
+              key={`raw-pt-${idx}`}
+              cx={pt.cx}
+              cy={pt.cy}
+              r="3.2"
+              fill="#22D3EE"
+              stroke="#070B0E"
+              strokeWidth="1"
+              opacity="0.92"
             />
-          </filter>
-
-          {/* Gradients for each point based on thermal intensity */}
-          {normalized.map((pt, idx) => {
-            const coreColor = getThermalColor(pt.intensity, 0.95);
-            const midColor = getThermalColor(pt.intensity * 0.65, 0.65);
-            const outerColor = getThermalColor(pt.intensity * 0.25, 0.15);
-
-            return (
-              <radialGradient
-                key={`thermal-grad-${idx}`}
-                id={`thermal-grad-${idx}`}
-                cx="50%"
-                cy="50%"
-                r="50%"
-              >
-                <stop offset="0%" stopColor={coreColor} />
-                <stop offset="45%" stopColor={midColor} />
-                <stop offset="75%" stopColor={outerColor} />
-                <stop offset="100%" stopColor="transparent" stopOpacity="0" />
-              </radialGradient>
-            );
-          })}
-        </defs>
-
-        {/* Soft thermal diffusion circles */}
-        <g filter="url(#heatmap-blur)">
-          {normalized.map((pt, idx) => {
-            // Radius scales dynamically with intensity (between 10 and 20 pitch units)
-            const radius = 10 + pt.intensity * 9;
-
-            return (
-              <circle
-                key={`heat-circle-${idx}`}
-                cx={pt.x}
-                cy={pt.y}
-                r={radius}
-                fill={`url(#thermal-grad-${idx})`}
-                className="transition-all duration-500 ease-out"
-              />
-            );
-          })}
+          ))}
         </g>
-      </motion.g>
-    </AnimatePresence>
+      )}
+    </g>
   );
 }
