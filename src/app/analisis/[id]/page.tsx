@@ -111,7 +111,6 @@ export default function AnalysisDashboardPage() {
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const reportePdf = data?.reportePdf;
-  console.log('data:', data);
   const hasServicePdf = Boolean(reportePdf?.base64);
 
   const handleDownloadPdfReport = () => {

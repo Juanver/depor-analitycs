@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HeatmapPoint } from '@/types/analysis';
 import {
   PITCH_VIEWBOX_WIDTH,
@@ -66,10 +66,9 @@ function buildThermalLut(): Uint8ClampedArray {
 const THERMAL_LUT = buildThermalLut();
 
 /**
- * Capa de Calor Térmico Real (Canvas 2D KDE + Paleta LUT Broadcast).
- * 1. Acumula densidad espacial en canal alpha (puntos aislados = baja densidad,
- *    zonas con alta superposición = pico máximo).
- * 2. Traduce la densidad acumulada a escala térmica (Azul -> Verde -> Amarillo -> Naranja -> Rojo).
+ * Capa de Calor Térmico Real (Canvas 2D offscreen KDE + Paleta LUT Broadcast).
+ * Renderiza la textura resultante como `<image>` SVG nativa para garantizar
+ * compatibilidad total con WebKit en iOS (Chrome/Safari iPhone) y Android/Desktop.
  */
 export function HeatmapLayer({
   points,
@@ -77,7 +76,7 @@ export function HeatmapLayer({
   visible = true,
   showRawPoints = false,
 }: HeatmapLayerProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [heatmapDataUrl, setHeatmapDataUrl] = useState<string | null>(null);
 
   const projectedPoints = React.useMemo(
     () =>
@@ -92,13 +91,18 @@ export function HeatmapLayer({
   );
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !visible) return;
+    if (!visible || projectedPoints.length === 0) {
+      setHeatmapDataUrl(null);
+      return;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = CANVAS_W;
+    canvas.height = CANVAS_H;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
-    if (projectedPoints.length === 0) return;
 
     // Radio y peso por punto calibrados al tamaño de la nube para que puntos aislados
     // se vean azules/verdes y las acumulaciones reales brillen en naranja/rojo.
@@ -135,7 +139,10 @@ export function HeatmapLayer({
       }
     }
 
-    if (maxAlpha === 0) return;
+    if (maxAlpha === 0) {
+      setHeatmapDataUrl(null);
+      return;
+    }
     const normPeak = Math.max(maxAlpha, 70);
 
     for (let i = 0; i < data.length; i += 4) {
@@ -152,32 +159,25 @@ export function HeatmapLayer({
     }
 
     ctx.putImageData(imgData, 0, 0);
+    setHeatmapDataUrl(canvas.toDataURL('image/png'));
   }, [projectedPoints, visible]);
 
   if (!visible || !points || points.length === 0) return null;
 
   return (
     <g>
-      <foreignObject
-        x="0"
-        y="0"
-        width={PITCH_VIEWBOX_WIDTH}
-        height={PITCH_VIEWBOX_HEIGHT}
-        style={{ pointerEvents: 'none' }}
-      >
-        <canvas
-          ref={canvasRef}
-          width={CANVAS_W}
-          height={CANVAS_H}
-          style={{
-            width: '100%',
-            height: '100%',
-            opacity,
-            mixBlendMode: 'screen',
-            display: 'block',
-          }}
+      {heatmapDataUrl && (
+        <image
+          href={heatmapDataUrl}
+          x={0}
+          y={0}
+          width={PITCH_VIEWBOX_WIDTH}
+          height={PITCH_VIEWBOX_HEIGHT}
+          preserveAspectRatio="none"
+          opacity={opacity}
+          style={{ pointerEvents: 'none' }}
         />
-      </foreignObject>
+      )}
 
       {/* Control de Depuración Visual: Puntos Crudos (cx, cy) */}
       {showRawPoints && (
