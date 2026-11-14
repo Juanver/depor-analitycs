@@ -426,7 +426,7 @@ export default function AnalysisDashboardPage() {
                   </SoccerPitchSVG>
 
                   {/* Watermark de Telemetría Homográfica */}
-                  <div className="pointer-events-none absolute bottom-2 left-2 px-2.5 py-1 rounded-xs bg-stadium-base/90 border border-stadium-border text-[9px] font-mono text-volt uppercase backdrop-blur-sm flex items-center gap-1.5">
+                  <div className="pointer-events-none absolute bottom-2 left-2 px-2.5 py-1 rounded-xs bg-stadium-base/90 border border-stadium-border text-[9px] font-mono text-volt uppercase flex items-center gap-1.5">
                     <Crosshair className="w-3 h-3 text-volt" />
                     <span>Centroide: [{blockData.centroideBloque.x.toFixed(1)}, {blockData.centroideBloque.y.toFixed(1)}]</span>
                   </div>
@@ -435,7 +435,7 @@ export default function AnalysisDashboardPage() {
                   <button
                     type="button"
                     onClick={() => setShowRawPoints((prev) => !prev)}
-                    className={`absolute bottom-2 right-2 z-20 px-2.5 py-1 rounded-xs border text-[10px] font-mono uppercase font-bold backdrop-blur-md transition-colors cursor-pointer ${
+                    className={`absolute bottom-2 right-2 z-20 px-2.5 py-1 rounded-xs border text-[10px] font-mono uppercase font-bold transition-colors cursor-pointer ${
                       showRawPoints
                         ? 'bg-telemetry-cyan/25 border-telemetry-cyan text-telemetry-cyan'
                         : 'bg-stadium-base/90 border-stadium-border text-slate-300 hover:text-white'
@@ -720,7 +720,7 @@ export default function AnalysisDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setShowRawPoints((prev) => !prev)}
-                  className={`absolute bottom-2 right-2 z-20 px-2.5 py-1 rounded-xs border text-[10px] font-mono uppercase font-bold backdrop-blur-md transition-colors cursor-pointer ${
+                  className={`absolute bottom-2 right-2 z-20 px-2.5 py-1 rounded-xs border text-[10px] font-mono uppercase font-bold transition-colors cursor-pointer ${
                     showRawPoints
                       ? 'bg-telemetry-cyan/25 border-telemetry-cyan text-telemetry-cyan'
                       : 'bg-stadium-base/90 border-stadium-border text-slate-300 hover:text-white'

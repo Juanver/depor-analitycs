@@ -38,7 +38,7 @@ export function TimelineScrubber({
   return (
     <div
       className={cn(
-        'w-full flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3 rounded-md bg-stadium-surface/90 border border-stadium-border backdrop-blur-md shadow-stadium',
+        'w-full flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3 rounded-md bg-stadium-surface/90 border border-stadium-border shadow-stadium',
         className
       )}
     >

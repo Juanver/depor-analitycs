@@ -64,7 +64,7 @@ export function Navbar({ breadcrumbs, activeMode, rightAction }: NavbarProps) {
   );
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-stadium-base/90 border-b border-stadium-border backdrop-blur-xl">
+    <header className="sticky top-0 z-40 w-full bg-stadium-base/90 border-b border-stadium-border">
       {/* Main Row: Mobile (Logo + Actions) | Tablet & Desktop (Logo + Mode Switcher + Actions) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3 md:gap-4">
         {/* Left: Brand Identity + Desktop Breadcrumbs */}

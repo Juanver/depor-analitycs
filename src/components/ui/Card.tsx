@@ -22,7 +22,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     ref
   ) => {
     const baseStyles =
-      'relative rounded-lg backdrop-blur-md overflow-hidden transition-all duration-300';
+      'relative rounded-lg overflow-hidden transition-all duration-300';
 
     const variantStyles = {
       default:

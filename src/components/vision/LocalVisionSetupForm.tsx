@@ -368,15 +368,18 @@ export function LocalVisionSetupForm() {
             </div>
           ) : (
             <div className="p-4 rounded-md bg-stadium-elevated border border-volt/40 flex items-center justify-between gap-3 shadow-lg">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-md bg-volt/20 text-volt border border-volt/30">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="p-2.5 rounded-md bg-volt/20 text-volt border border-volt/30 shrink-0">
                   <FileCheck className="w-6 h-6" />
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-mono font-bold text-white truncate max-w-xs sm:max-w-md">
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span
+                    className="text-xs font-mono font-bold text-white truncate block w-full"
+                    title={videoFile.name}
+                  >
                     {videoFile.name}
                   </span>
-                  <span className="text-[10px] text-slate-400 font-sans">
+                  <span className="text-[10px] text-slate-400 font-sans truncate">
                     {(videoFile.size / (1024 * 1024)).toFixed(2)} MB
                     {videoDurationSec > 0 && (
                       <>
@@ -394,7 +397,7 @@ export function LocalVisionSetupForm() {
               <button
                 type="button"
                 onClick={handleRemoveFile}
-                className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-colors shrink-0"
                 title="Quitar video"
               >
                 <X className="w-4 h-4" />

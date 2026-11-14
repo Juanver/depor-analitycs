@@ -49,34 +49,39 @@ export function TeamSegmentTrackingCard({
   return (
     <Card variant="default" className={`p-4 flex flex-col gap-3.5 ${className || ''}`}>
       {/* Header: Team Collective Tracking Focus */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
-        <div className="flex items-center gap-3">
-          {/* Team Crest */}
-          <div className="w-9 h-9 rounded-md bg-stadium-elevated border border-telemetry-cyan/40 flex items-center justify-center shrink-0 shadow-cyan-glow">
-            <Users className="w-5 h-5 text-telemetry-cyan" />
+      <div className="flex flex-col gap-2.5 border-b border-stadium-border pb-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            {/* Team Crest */}
+            <div className="w-10 h-10 rounded-md bg-stadium-elevated border border-telemetry-cyan/40 flex items-center justify-center shrink-0 shadow-cyan-glow">
+              <Users className="w-5 h-5 text-telemetry-cyan" />
+            </div>
+
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-[10px] font-display uppercase tracking-widest text-volt font-bold flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-volt shrink-0" />
+                <span className="truncate">Resumen del Equipo</span>
+              </span>
+              <h3 className="font-display font-black text-base uppercase tracking-wide text-white truncate">
+                {teamName}
+              </h3>
+            </div>
           </div>
 
-          <div className="flex flex-col leading-tight">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[10px] font-display uppercase tracking-widest text-volt font-bold flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-volt" />
-                SEGUIMIENTO TÁCTICO DE BLOQUE
-              </span>
-              <span className="text-slate-500 text-xs">•</span>
-              <span className="text-[10px] font-mono text-telemetry-cyan font-semibold">
-                {matchFormat}
-              </span>
-            </div>
-            <h3 className="font-display font-black text-sm uppercase tracking-wide text-white">
-              {teamName}
-            </h3>
-          </div>
+          <span className="px-2 py-0.5 rounded-xs bg-telemetry-cyan/15 border border-telemetry-cyan/30 text-[10px] font-mono text-telemetry-cyan font-semibold shrink-0">
+            {matchFormat}
+          </span>
         </div>
 
         {/* Formation pill */}
-        <div className="flex items-center gap-1.5 px-2 py-1 rounded-xs bg-stadium-base border border-stadium-border text-[9px] font-mono text-slate-300 shrink-0">
-          <Layers className="w-3 h-3 text-volt shrink-0" />
-          <span>{nominalSys} → {detectedSys}</span>
+        <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs bg-stadium-base border border-stadium-border text-[10px] font-mono text-slate-300">
+          <span className="flex items-center gap-1.5 text-slate-400 shrink-0">
+            <Layers className="w-3 h-3 text-volt shrink-0" />
+            <span>Sistema</span>
+          </span>
+          <span className="font-semibold text-white truncate">
+            {nominalSys} → {detectedSys}
+          </span>
         </div>
       </div>
 

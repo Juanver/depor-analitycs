@@ -35,7 +35,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="p-2.5 rounded-md bg-stadium-elevated border border-stadium-border text-white shadow-xl backdrop-blur-md text-xs font-mono">
+      <div className="p-2.5 rounded-md bg-stadium-elevated border border-stadium-border text-white shadow-xl text-xs font-mono">
         <div className="font-display uppercase tracking-wider text-volt font-bold text-sm">
           {data.subject}
         </div>

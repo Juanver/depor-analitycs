@@ -263,7 +263,7 @@ export function SyncedVideoPlayer({
         )}
 
         {/* Telemetry watermark overlay */}
-        <div className="pointer-events-none absolute bottom-2 right-2 px-2 py-0.5 rounded-xs bg-stadium-base/80 border border-stadium-border text-[9px] font-display uppercase tracking-widest text-slate-400 backdrop-blur-sm z-10 flex items-center gap-1">
+        <div className="pointer-events-none absolute bottom-2 right-2 px-2 py-0.5 rounded-xs bg-stadium-base/80 border border-stadium-border text-[9px] font-display uppercase tracking-widest text-slate-400 z-10 flex items-center gap-1">
           {isOpticalTracking ? (
             <>
               <Crosshair className="w-2.5 h-2.5 text-volt" />

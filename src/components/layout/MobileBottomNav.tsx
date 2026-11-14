@@ -21,7 +21,7 @@ export function MobileBottomNav({
   ];
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-stadium-base/95 border-t border-stadium-border backdrop-blur-xl px-2 py-1 shadow-2xl">
+    <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-stadium-base/95 border-t border-stadium-border px-2 py-1 shadow-2xl">
       <div className="grid grid-cols-4 gap-1">
         {navItems.map((item) => {
           const isActive = activeSection === item.id;

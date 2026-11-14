@@ -186,7 +186,7 @@ export function EventTooltipCard({
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="w-60 sm:w-64 p-3 rounded-md bg-stadium-elevated/95 border border-stadium-border-strong text-white shadow-2xl backdrop-blur-md flex flex-col gap-2">
+      <div className="w-60 sm:w-64 p-3 rounded-md bg-stadium-elevated/95 border border-stadium-border-strong text-white shadow-2xl flex flex-col gap-2">
         {/* Header: Timestamp + Success badge */}
         <div className="flex items-center justify-between gap-1 border-b border-white/10 pb-1.5">
           <span className="font-mono text-volt font-bold text-xs flex items-center gap-1">

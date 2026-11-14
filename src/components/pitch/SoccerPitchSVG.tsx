@@ -83,7 +83,7 @@ export function SoccerPitchSVG({
       {/* Top Broadcast HUD Telemetry Bar */}
       <div className="absolute top-2 inset-x-3 z-20 flex items-center justify-between gap-2 pointer-events-none">
         {/* Left Indicator: ARCO PROPIO (DEFENSA) */}
-        <div className="pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-xs bg-stadium-base/90 border border-telemetry-cyan/50 text-telemetry-cyan shadow-cyan-glow backdrop-blur-md">
+        <div className="pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-xs bg-stadium-base/90 border border-telemetry-cyan/50 text-telemetry-cyan shadow-cyan-glow">
           <Shield className="w-3.5 h-3.5 text-telemetry-cyan fill-telemetry-cyan/20 shrink-0" />
           <div className="flex flex-col leading-none">
             <span className="text-[9px] font-display uppercase tracking-widest font-black">
@@ -98,12 +98,12 @@ export function SoccerPitchSVG({
         {/* Center: ATTACK DIRECTION & MATCH FORMAT */}
         <div className="hidden sm:flex items-center gap-2">
           {matchFormat && (
-            <div className="px-2 py-1 rounded-xs bg-telemetry-cyan/15 border border-telemetry-cyan/40 text-[9px] font-display uppercase tracking-widest text-telemetry-cyan font-bold backdrop-blur-md">
+            <div className="px-2 py-1 rounded-xs bg-telemetry-cyan/15 border border-telemetry-cyan/40 text-[9px] font-display uppercase tracking-widest text-telemetry-cyan font-bold">
               {matchFormat}
             </div>
           )}
           {showAttackDirection && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-xs bg-stadium-base/85 border border-volt/40 text-[10px] font-display uppercase tracking-widest text-volt shadow-volt-glow backdrop-blur-md">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-xs bg-stadium-base/85 border border-volt/40 text-[10px] font-display uppercase tracking-widest text-volt shadow-volt-glow">
               <span>{attackDirectionText}</span>
               <ArrowRight className="w-3.5 h-3.5 text-volt animate-pulse" />
             </div>
@@ -111,7 +111,7 @@ export function SoccerPitchSVG({
         </div>
 
         {/* Right Indicator: ARCO RIVAL (OBJETIVO) */}
-        <div className="pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-xs bg-stadium-base/90 border border-volt/60 text-volt shadow-volt-glow backdrop-blur-md">
+        <div className="pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-xs bg-stadium-base/90 border border-volt/60 text-volt shadow-volt-glow">
           <div className="flex flex-col text-right leading-none">
             <span className="text-[9px] font-display uppercase tracking-widest font-black">
               ARCO RIVAL
