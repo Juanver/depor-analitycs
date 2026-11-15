@@ -1,16 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Breadcrumbs, BreadcrumbItem } from './Breadcrumbs';
+import { BrandMark } from './BrandMark';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Button } from '@/components/ui/Button';
+import { createClient } from '@/lib/supabase/client';
 import {
-  Zap,
   User,
   Users,
   Plus,
+  LogOut,
 } from 'lucide-react';
 
 export interface NavbarProps {
@@ -22,6 +24,22 @@ export interface NavbarProps {
 
 export function Navbar({ breadcrumbs, activeMode, rightAction }: NavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      const supabase = createClient();
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
+      router.push('/login');
+      router.refresh();
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   // Si se provee activeMode explícitamente (ej. desde /analisis/[id]), respetarlo
   let isPlayerActive = false;
@@ -69,23 +87,7 @@ export function Navbar({ breadcrumbs, activeMode, rightAction }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3 md:gap-4">
         {/* Left: Brand Identity + Desktop Breadcrumbs */}
         <div className="flex items-center gap-3 min-w-0">
-          <Link
-            href="/"
-            className="flex items-center gap-2 group focus-visible:outline-none shrink-0"
-          >
-            <div className="relative flex items-center justify-center w-8 h-8 rounded-md bg-gradient-to-br from-stadium-elevated to-stadium-base border border-volt/50 shadow-volt-glow group-hover:scale-105 transition-transform">
-              <Zap className="w-4 h-4 text-volt fill-volt/30" />
-            </div>
-
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-display font-black text-base sm:text-lg tracking-tight text-[var(--color-text-main)] uppercase">
-                SPORT<span className="text-volt">INTELLIGENCE</span>
-              </span>
-              <span className="hidden lg:inline-block text-[9px] font-mono font-bold tracking-widest text-slate-400 uppercase">
-                PRO AI
-              </span>
-            </div>
-          </Link>
+          <BrandMark href="/" />
 
           {/* Contextual Breadcrumbs (Desktop) */}
           {breadcrumbs && breadcrumbs.length > 0 && (
@@ -120,6 +122,20 @@ export function Navbar({ breadcrumbs, activeMode, rightAction }: NavbarProps) {
               <span className="md:hidden">Nuevo</span>
             </Button>
           </Link>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            aria-label="Cerrar sesión"
+            title="Cerrar sesión"
+            className="relative w-8 h-8 sm:w-auto sm:px-2.5 rounded-md bg-stadium-surface hover:bg-stadium-elevated border border-stadium-border flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-slate-300 hover:text-thermal-high disabled:opacity-50"
+          >
+            <LogOut className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden xl:inline font-display text-[11px] uppercase tracking-wider font-bold">
+              Salir
+            </span>
+          </button>
         </div>
       </div>
 
